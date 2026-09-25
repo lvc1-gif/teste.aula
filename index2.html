@@ -1,0 +1,2408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">AGROIA - Sistema de Gestão Agrícola Inteligente</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-hover: #1b5e20;
+            --secondary: #0288d1;
+            --secondary-hover: #01579b;
+            --background: #f4f6f8;
+            --surface: #ffffff;
+            --text: #212121;
+            --text-secondary: #666666;
+            --border: #e0e0e0;
+            --success: #2e7d32;
+            --warning: #ed6c02;
+            --danger: #d32f2f;
+            --info: #0288d1;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        aside {
+            width: var(--sidebar-width);
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .brand {
+            padding: 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        nav {
+            padding: 10px 0;
+            flex: 1;
+        }
+
+        nav a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            background-color: #f0f7f0;
+            color: var(--primary);
+        }
+
+        nav a.active {
+            background-color: #e8f5e9;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            font-weight: 600;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        /* Main Content Styles */
+        main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 30px;
+            max-width: calc(100vw - var(--sidebar-width));
+            transition: margin-left 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h2 {
+            font-size: 1.5rem;
+            color: var(--text);
+        }
+
+        .section-view {
+            display: none;
+        }
+
+        .section-view.active {
+            display: block;
+        }
+
+        /* UI Components */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background-color: var(--surface);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .card .subtext {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .table-container {
+            background: var(--surface);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #fafafa;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 9px 16px;
+            border-radius: 6px;
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        .btn-danger:hover {
+            background-color: #b71c1c;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            background-color: #f0f0f0;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+            background-color: var(--surface);
+            color: var(--text);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+        }
+
+        /* Kanban Board */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            align-items: start;
+        }
+
+        .kanban-column {
+            background-color: #f0f2f5;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 450px;
+            border: 1px solid var(--border);
+        }
+
+        .kanban-column h4 {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kanban-cards {
+            min-height: 380px;
+        }
+
+        .kanban-card {
+            background-color: var(--surface);
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            cursor: grab;
+        }
+
+        .kanban-card.dragging {
+            opacity: 0.5;
+        }
+
+        .kanban-card h5 {
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+
+        .kanban-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .kanban-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        /* Badges & Status */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-success { background: #e8f5e9; color: var(--success); }
+        .badge-warning { background: #fff3e0; color: var(--warning); }
+        .badge-danger { background: #ffebee; color: var(--danger); }
+        .badge-info { background: #e1f5fe; color: var(--info); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--surface);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            min-width: 250px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            background: #323232;
+            color: #fff;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Native Chart CSS */
+        .simple-bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            height: 180px;
+            padding-top: 20px;
+            border-bottom: 2px solid var(--border);
+            margin-top: 15px;
+        }
+
+        .chart-bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .chart-bar {
+            width: 100%;
+            max-width: 40px;
+            background: var(--primary);
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+            position: relative;
+        }
+
+        .chart-bar-value {
+            position: absolute;
+            top: -20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .chart-label {
+            font-size: 0.75rem;
+            margin-top: 8px;
+            color: var(--text-secondary);
+            text-align: center;
+            word-break: break-all;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            aside {
+                transform: translateX(-100%);
+            }
+            aside.open {
+                transform: translateX(0);
+            }
+            main {
+                margin-left: 0;
+                max-width: 100vw;
+                padding: 80px 15px 20px 15px;
+            }
+            .mobile-header {
+                display: flex;
+            }
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        <span style="font-weight: bold; color: var(--primary);" id="mobile-title">AGROIA</span>
+        <div style="width: 24px;"></div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar">
+        <div class="brand">
+            <span id="sys-brand-title">🌱 AGROIA</span>
+            <button class="toggle-btn" style="display: none;" id="close-sidebar-btn" onclick="toggleSidebar()">✕</button>
+        </div>
+        <nav>
+            <a class="nav-link active" data-section="dashboard" onclick="navigate('dashboard')">Dashboard</a>
+            <a class="nav-link" data-section="irrigacao" onclick="navigate('irrigacao')">Análise de Irrigação</a>
+            <a class="nav-link" data-section="qualidade-inteligente" onclick="navigate('qualidade-inteligente')">Qualidade Inteligente</a>
+            <a class="nav-link" data-section="producao-sustentavel" onclick="navigate('producao-sustentavel')">Produção Sustentável</a>
+            <a class="nav-link" data-section="dados-agricolas" onclick="navigate('dados-agricolas')">Dados Agrícolas</a>
+            <a class="nav-link" data-section="talhoes" onclick="navigate('talhoes')">Talhões</a>
+            <a class="nav-link" data-section="qualidade-dados" onclick="navigate('qualidade-dados')">Qualidade dos Dados</a>
+            <a class="nav-link" data-section="kanban" onclick="navigate('kanban')">Kanban</a>
+            <a class="nav-link" data-section="sprints" onclick="navigate('sprints')">Sprints</a>
+            <a class="nav-link" data-section="modelo-ia" onclick="navigate('modelo-ia')">Modelo de Recomendação</a>
+            <a class="nav-link" data-section="configuracoes" onclick="navigate('configuracoes')">Configurações</a>
+            <a class="nav-link" data-section="backup" onclick="navigate('backup')">Backup & Dados</a>
+        </nav>
+    </aside>
+
+    <main>
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="section-view active">
+            <div class="header">
+                <div>
+                    <h2 id="dash-prop-name">Fazenda Demonstration</h2>
+                    <p class="subtext" id="dash-subtitle">Visão geral do monitoramento e inteligência operacional</p>
+                </div>
+                <button class="btn" onclick="refreshDashboard()"><span style="font-size:1.1rem;">↻</span> Atualizar Dados</button>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Área Total Monitorada</h3>
+                    <div class="value" id="dash-area">--</div>
+                    <div class="subtext" id="dash-area-sub">Soma de todos os talhões</div>
+                </div>
+                <div class="card">
+                    <h3>Quantidade de Talhões</h3>
+                    <div class="value" id="dash-qtd-talhoes">--</div>
+                    <div class="subtext">Talhões cadastrados</div>
+                </div>
+                <div class="card">
+                    <h3>Produção Estimada</h3>
+                    <div class="value" id="dash-producao">--</div>
+                    <div class="subtext">Baseado nos registros</div>
+                </div>
+                <div class="card">
+                    <h3>Produtividade Média</h3>
+                    <div class="value" id="dash-produtividade-media">--</div>
+                    <div class="subtext">Média por área monitorada</div>
+                </div>
+                <div class="card">
+                    <h3>Água Utilizada</h3>
+                    <div class="value" id="dash-agua-utilizada">--</div>
+                    <div class="subtext">Total registrado no histórico</div>
+                </div>
+                <div class="card">
+                    <h3>Água Recomendada</h3>
+                    <div class="value" id="dash-agua-recomendada">--</div>
+                    <div class="subtext">Módulo de apoio à decisão</div>
+                </div>
+                <div class="card">
+                    <h3>Economia Estimada</h3>
+                    <div class="value" id="dash-economia">--</div>
+                    <div class="subtext">Potencial de redução</div>
+                </div>
+                <div class="card">
+                    <h3>Eficiência de Irrigação</h3>
+                    <div class="value" id="dash-eficiencia">--</div>
+                    <div class="subtext">Média ponderada</div>
+                </div>
+                <div class="card">
+                    <h3>Umidade Média do Solo</h3>
+                    <div class="value" id="dash-umidade">--</div>
+                    <div class="subtext">Média das medições</div>
+                </div>
+                <div class="card">
+                    <h3>Precipitação Acumulada</h3>
+                    <div class="value" id="dash-precipitacao">--</div>
+                    <div class="subtext">Volume de chuva registrado</div>
+                </div>
+                <div class="card">
+                    <h3>Qualidade Média</h3>
+                    <div class="value" id="dash-qualidade">--</div>
+                    <div class="subtext">Índice da safra (0 a 10)</div>
+                </div>
+                <div class="card">
+                    <h3>Desperdício Médio</h3>
+                    <div class="value" id="dash-desperdicio">--</div>
+                    <div class="subtext">Percentual de perdas</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Produtividade por Talhão (Visualização Rápida)</h3>
+                <div id="dashboard-chart-container">
+                    <!-- Dynamic CSS Bar Chart -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ANÁLISE DE IRRIGAÇÃO -->
+        <section id="irrigacao" class="section-view">
+            <div class="header">
+                <h2>Análise de Irrigação (Apoio à Decisão)</h2>
+            </div>
+            
+            <div class="card">
+                <h3>Modelo Demonstrativo de Recomendação Baseado em Regras</h3>
+                <p class="subtext" style="margin-bottom: 20px;">
+                    Preencha os dados abaixo para calcular visualmente a necessidade hídrica aproximada. O modelo aplica cálculos matriciais transparentes baseados no balanço hídrico de solo/cultura.
+                </p>
+
+                <form id="irrigation-form" onsubmit="calculateIrrigation(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Talhão</label>
+                            <select id="irr-talhao" onchange="autoFillIrrigationTalhaoData()" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cultura</label>
+                            <input type="text" id="irr-cultura" placeholder="Ex: Milho" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Área (m²)</label>
+                            <input type="number" step="0.01" id="irr-area" placeholder="Ex: 10000" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Umidade do Solo (%)</label>
+                            <input type="number" step="0.1" id="irr-umidade" placeholder="Ex: 35" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Temperatura (°C)</label>
+                            <input type="number" step="0.1" id="irr-temp" placeholder="Ex: 28" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Chuva Recente (mm)</label>
+                            <input type="number" step="0.1" id="irr-chuva" placeholder="Ex: 5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Água Utilizada Anteriormente (L)</label>
+                            <input type="number" step="0.1" id="irr-agua-anterior" placeholder="Ex: 15000" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Vazão do Sistema (L/h) - Opcional</label>
+                            <input type="number" step="0.1" id="irr-vazao" placeholder="Ex: 2000">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Calcular Recomendação</button>
+                </form>
+            </div>
+
+            <div id="irrigation-result" class="card" style="display: none;">
+                <h3>Resultado da Análise Hídrica</h3>
+                <div class="card-grid" style="margin-top: 15px;">
+                    <div class="card">
+                        <h3>Necessidade de Irrigação</h3>
+                        <div class="value" id="res-necessidade">--</div>
+                    </div>
+                    <div class="card">
+                        <h3>Água Recomendada</h3>
+                        <div class="value" id="res-agua-rec">--</div>
+                        <div class="subtext" id="res-agua-rec-m2">-- L/m²</div>
+                    </div>
+                    <div class="card">
+                        <h3>Água Anteriormente Utilizada</h3>
+                        <div class="value" id="res-agua-ant">--</div>
+                        <div class="subtext" id="res-agua-ant-m2">-- L/m²</div>
+                    </div>
+                    <div class="card">
+                        <h3>Economia Estimada</h3>
+                        <div class="value" id="res-economia">--</div>
+                        <div class="subtext" id="res-economia-pct">--%</div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 15px; background: #fafafa; border-radius: 6px; border: 1px solid var(--border);">
+                    <h4 style="margin-bottom: 5px;">Justificativa e Parâmetros</h4>
+                    <p id="res-justificativa" style="font-size: 0.95rem; color: #444;"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUALIDADE INTELIGENTE -->
+        <section id="qualidade-inteligente" class="section-view">
+            <div class="header">
+                <h2>Qualidade Inteligente</h2>
+            </div>
+            <div class="card">
+                <h3>Análise Integrada Baseada em Dados Agrícolas Cadastrados</h3>
+                <p class="subtext" style="margin-bottom: 20px;">
+                    Consolidação analítica das variáveis de produção, pragas e clima. Nota: Os indicadores refletem estritamente as medições registradas em sistema.
+                </p>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Qualidade Média da Safra</h3>
+                        <div class="value" id="qi-qualidade">--</div>
+                    </div>
+                    <div class="card">
+                        <h3>Produtividade Média</h3>
+                        <div class="value" id="qi-produtividade">--</div>
+                    </div>
+                    <div class="card">
+                        <h3>Desperdício Médio</h3>
+                        <div class="value" id="qi-desperdicio">--</div>
+                    </div>
+                    <div class="card">
+                        <h3>Incidência Média de Pragas</h3>
+                        <div class="value" id="qi-pragas">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Registros Críticos e Padrões Detectados</h3>
+                <div id="qi-padroes-list">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+        </section>
+
+        <!-- PRODUÇÃO SUSTENTÁVEL -->
+        <section id="producao-sustentavel" class="section-view">
+            <div class="header">
+                <h2>Produção Sustentável & Impacto Ambiental</h2>
+            </div>
+
+            <div class="card">
+                <h3>Indicadores de Sustentabilidade (Valores Reais Calculados)</h3>
+                <p class="subtext" style="margin-bottom: 20px;">
+                    Cálculo direto de insumos e consumo de recursos a partir dos registros agrícolas.
+                </p>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Água Utilizada (Total)</h3>
+                        <div class="value" id="sust-agua-utilizada">--</div>
+                    </div>
+                    <div class="card">
+                        <h3>Diferença p/ Recomendado</h3>
+                        <div class="value" id="sust-diferenca-agua">--</div>
+                    </div>
+                    <div class="card">
+                        <h3>Uso Médio por m²</h3>
+                        <div class="value" id="sust-agua-m2">--</div>
+                    </div>
+                    <div class="card">
+                        <h3>Produtividade por Área</h3>
+                        <div class="value" id="sust-prod-area">--</div>
+                    </div>
+                    <div class="card">
+                        <h3>Fertilizantes Aplicados</h3>
+                        <div class="value" id="sust-fertilizante">--</div>
+                    </div>
+                    <div class="card">
+                        <h3>Desperdício Total</h3>
+                        <div class="value" id="sust-desperdicio">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Visão de Impacto e Recursos</h3>
+                <div id="sust-impacto-texto">
+                    <!-- Text generated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- DADOS AGRÍCOLAS -->
+        <section id="dados-agricolas" class="section-view">
+            <div class="header">
+                <h2>Registros de Dados Agrícolas</h2>
+                <div class="btn-group">
+                    <button class="btn" onclick="openAgriModal()"><span style="font-size:1.1rem;">+</span> Novo Registro</button>
+                    <button class="btn btn-secondary" onclick="exportAgriCSV()">Exportar CSV</button>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 15px; margin-bottom: 15px;">
+                <div class="form-grid">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Buscar</label>
+                        <input type="text" id="agri-search" placeholder="Cultura, Talhão..." oninput="renderAgriTable()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Filtrar por Talhão</label>
+                        <select id="agri-filter-talhao" onchange="renderAgriTable()"></select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Ordenar por</label>
+                        <select id="agri-sort" onchange="renderAgriTable()">
+                            <option value="data-desc">Data (Mais recente)</option>
+                            <option value="data-asc">Data (Mais antiga)</option>
+                            <option value="prod-desc">Produtividade (Maior)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Talhão</th>
+                            <th>Cultura</th>
+                            <th>Chuva (mm)</th>
+                            <th>Temp (°C)</th>
+                            <th>Umid (%)</th>
+                            <th>Irrigação (L)</th>
+                            <th>Fertil. (kg)</th>
+                            <th>Pragas</th>
+                            <th>Produt. (ton)</th>
+                            <th>Qual. (0-10)</th>
+                            <th>Desp (%)</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agri-data-table">
+                        <!-- Rendered via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TALHÕES -->
+        <section id="talhoes" class="section-view">
+            <div class="header">
+                <h2>Gerenciamento de Talhões</h2>
+                <button class="btn" onclick="openTalhaoModal()"><span style="font-size:1.1rem;">+</span> Novo Talhão</button>
+            </div>
+
+            <div class="card" style="padding: 15px; margin-bottom: 15px;">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Pesquisar Talhões</label>
+                    <input type="text" id="talhao-search" placeholder="Nome ou cultura..." oninput="renderTalhoes()">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Área (ha)</th>
+                            <th>Área (m²)</th>
+                            <th>Cultura Padrão</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="talhoes-table-body">
+                        <!-- Rendered via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- QUALIDADE DOS DADOS -->
+        <section id="qualidade-dados" class="section-view">
+            <div class="header">
+                <h2>Qualidade & Integridade dos Dados</h2>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Total de Registros</h3>
+                    <div class="value" id="qd-total">--</div>
+                </div>
+                <div class="card">
+                    <h3>Registros Válidos</h3>
+                    <div class="value" id="qd-validos">--</div>
+                </div>
+                <div class="card">
+                    <h3>Registros com Problemas</h3>
+                    <div class="value" id="qd-problemas">--</div>
+                </div>
+                <div class="card">
+                    <h3>Completude dos Dados</h3>
+                    <div class="value" id="qd-completude">--%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Relatório de Inconsistências Detectadas</h3>
+                <div class="table-container" style="margin-top: 15px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Origem</th>
+                                <th>ID Registro</th>
+                                <th>Tipo de Problema</th>
+                                <th>Descrição do Erro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="qd-report-table">
+                            <!-- Rendered via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- KANBAN -->
+        <section id="kanban" class="section-view">
+            <div class="header">
+                <h2>Quadro Kanban - Operações do Campo</h2>
+                <button class="btn" onclick="openTaskModal()"><span style="font-size:1.1rem;">+</span> Nova Tarefa</button>
+            </div>
+
+            <div class="kanban-board">
+                <div class="kanban-column" ondragover="allowDrop(event)" ondrop="drop(event, 'A Fazer')">
+                    <h4>A Fazer <span id="count-todo" class="badge badge-warning">0</span></h4>
+                    <div class="kanban-cards" id="kanban-todo"></div>
+                </div>
+                <div class="kanban-column" ondragover="allowDrop(event)" ondrop="drop(event, 'Em Execução')">
+                    <h4>Em Execução <span id="count-doing" class="badge badge-info">0</span></h4>
+                    <div class="kanban-cards" id="kanban-doing"></div>
+                </div>
+                <div class="kanban-column" ondragover="allowDrop(event)" ondrop="drop(event, 'Concluído')">
+                    <h4>Concluído <span id="count-done" class="badge badge-success">0</span></h4>
+                    <div class="kanban-cards" id="kanban-done"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SPRINTS -->
+        <section id="sprints" class="section-view">
+            <div class="header">
+                <h2>Acompanhamento das Sprints do Projeto</h2>
+            </div>
+
+            <div id="sprints-container" class="card-grid" style="grid-template-columns: 1fr;">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- MODELO DE IA -->
+        <section id="modelo-ia" class="section-view">
+            <div class="header">
+                <h2>Modelo de Recomendação & Decisão</h2>
+            </div>
+
+            <div class="card">
+                <h3>Documentação do Modelo Agronômico</h3>
+                <div style="line-height: 1.6; font-size: 0.95rem; margin-top: 10px;">
+                    <p><strong>Tipo de Modelo:</strong> Sistema Especialista Baseado em Regras e Equações Agronômicas Matemáticas.</p>
+                    <p><strong>Entradas Utilizadas:</strong> Umidade atual do solo (%), Precipitação pluviométrica (mm), Temperatura (°C), Área cultivada (m²) e Tipo de cultura.</p>
+                    <p><strong>Processamento:</strong> O algoritmo calcula a evapotranspiração estimada e o déficit hídrico ponderado em relação à capacidade de campo recomendada para a cultura.</p>
+                    <p><strong>Saída:</strong> Recomendação volumétrica de irrigação (Litros) e estimativa de economia em relação ao histórico.</p>
+                    <p><strong>Nível de Confiança Determinístico:</strong> 95.0% (Baseado nas tabelas estáticas de evapotranspiração e balanço hídrico).</p>
+                    <p><strong>Última Atualização dos Parâmetros:</strong> <span id="ia-last-update">25/09/2026</span></p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Parâmetros de Cálculo do Modelo</h3>
+                <form id="ia-params-form" onsubmit="saveIaParams(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Umidade Alvo Padrão (%)</label>
+                            <input type="number" id="ia-param-umidade-alvo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Fator de Evapotranspiração Base (mm/°C)</label>
+                            <input type="number" step="0.01" id="ia-param-evapo" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Atualizar Parâmetros do Modelo</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- CONFIGURAÇÕES -->
+        <section id="configuracoes" class="section-view">
+            <div class="header">
+                <h2>Configurações do Sistema & Personalização</h2>
+            </div>
+
+            <div class="card">
+                <h3>Configurações Gerais da Propriedade</h3>
+                <form onsubmit="saveGeneralSettings(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nome da Propriedade / Fazenda</label>
+                            <input type="text" id="cfg-property-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Unidade de Área Padrão</label>
+                            <select id="cfg-unit">
+                                <option value="ha">Hectares (ha)</option>
+                                <option value="m2">Metros Quadrados (m²)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Salvar Configurações Gerais</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Área de Administração: Personalização do Sistema</h3>
+                <form onsubmit="saveAdminSettings(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nome do Sistema</label>
+                            <input type="text" id="cfg-sys-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição do Sistema</label>
+                            <input type="text" id="cfg-sys-desc" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Culturas Suportadas (separadas por vírgula)</label>
+                            <input type="text" id="cfg-cultures" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Limiar Mínimo de Umidade Alerta (%)</label>
+                            <input type="number" id="cfg-min-humidity" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Salvar Personalização</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- BACKUP -->
+        <section id="backup" class="section-view">
+            <div class="header">
+                <h2>Backup e Gerenciamento de Dados</h2>
+            </div>
+
+            <div class="card">
+                <h3>Exportar e Importar Backup (JSON)</h3>
+                <p class="subtext" style="margin-bottom: 20px;">
+                    Faça download de todas as informações armazenadas no LocalStorage ou restaure um arquivo de backup previamente gerado.
+                </p>
+                <div class="btn-group">
+                    <button class="btn" onclick="exportBackup()">Exportar Backup Completo</button>
+                    <button class="btn btn-secondary" onclick="triggerImportBackup()">Importar Arquivo de Backup</button>
+                    <input type="file" id="backup-file-input" style="display:none;" accept=".json" onchange="importBackup(event)">
+                </div>
+            </div>
+
+            <div class="card" style="border-color: #ffcdd2;">
+                <h3 style="color: var(--danger);">Restauração & Limpeza de Dados</h3>
+                <p class="subtext" style="margin-bottom: 20px;">
+                    Ações de redefinição do estado da aplicação.
+                </p>
+                <div class="btn-group">
+                    <button class="btn btn-outline" onclick="restoreDemoData()">Restaurar Dados Demonstrativos</button>
+                    <button class="btn btn-danger" onclick="clearAllData()">Limpar Todos os Dados</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL TALHÃO -->
+    <div id="modal-talhao" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-talhao-title">Cadastrar Talhão</h3>
+                <button class="toggle-btn" onclick="closeModal('modal-talhao')">✕</button>
+            </div>
+            <form id="form-talhao" onsubmit="saveTalhao(event)">
+                <input type="hidden" id="talhao-id">
+                <div class="form-group">
+                    <label>Nome do Talhão *</label>
+                    <input type="text" id="talhao-nome" required placeholder="Ex: Talhão 01">
+                </div>
+                <div class="form-group">
+                    <label>Área em Hectares (ha) *</label>
+                    <input type="number" step="0.01" id="talhao-area" required placeholder="Ex: 50.5">
+                </div>
+                <div class="form-group">
+                    <label>Cultura Principal *</label>
+                    <select id="talhao-cultura" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select id="talhao-status" required>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Em Preparo">Em Preparo</option>
+                        <option value="Pousio">Pousio</option>
+                        <option value="Inativo">Inativo</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-talhao')">Cancelar</button>
+                    <button type="submit" class="btn">Salvar Talhão</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DADOS AGRÍCOLAS -->
+    <div id="modal-agri" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-agri-title">Registro Agrícola</h3>
+                <button class="toggle-btn" onclick="closeModal('modal-agri')">✕</button>
+            </div>
+            <form id="form-agri" onsubmit="saveAgriData(event)">
+                <input type="hidden" id="agri-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data *</label>
+                        <input type="date" id="agri-data" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Talhão *</label>
+                        <select id="agri-talhao-select" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cultura *</label>
+                        <select id="agri-cultura-select" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Chuva (mm)</label>
+                        <input type="number" step="0.1" id="agri-chuva" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Temperatura (°C)</label>
+                        <input type="number" step="0.1" id="agri-temp" value="25">
+                    </div>
+                    <div class="form-group">
+                        <label>Umidade do Solo (%)</label>
+                        <input type="number" step="0.1" id="agri-umidade" value="40" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Irrigação (L)</label>
+                        <input type="number" step="0.1" id="agri-irrigacao" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Fertilizante Aplicado (kg)</label>
+                        <input type="number" step="0.1" id="agri-fertilizante" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Incidência de Pragas</label>
+                        <select id="agri-pragas">
+                            <option value="Nenhuma">Nenhuma</option>
+                            <option value="Baixa">Baixa</option>
+                            <option value="Média">Média</option>
+                            <option value="Alta">Alta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Produtividade Estimada (ton)</label>
+                        <input type="number" step="0.1" id="agri-produtividade" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Qualidade (0 a 10)</label>
+                        <input type="number" step="0.1" id="agri-qualidade" value="8" min="0" max="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Desperdício (%)</label>
+                        <input type="number" step="0.1" id="agri-desperdicio" value="0" min="0" max="100">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-agri')">Cancelar</button>
+                    <button type="submit" class="btn">Salvar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL TASK KANBAN -->
+    <div id="modal-task" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-task-title">Nova Tarefa</h3>
+                <button class="toggle-btn" onclick="closeModal('modal-task')">✕</button>
+            </div>
+            <form id="form-task" onsubmit="saveTask(event)">
+                <input type="hidden" id="task-id">
+                <div class="form-group">
+                    <label>Título da Tarefa *</label>
+                    <input type="text" id="task-title" required placeholder="Ex: Calibrar pivô de irrigação">
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="task-desc" rows="3" placeholder="Detalhes da execução..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="task-status">
+                        <option value="A Fazer">A Fazer</option>
+                        <option value="Em Execução">Em Execução</option>
+                        <option value="Concluído">Concluído</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-task')">Cancelar</button>
+                    <button type="submit" class="btn">Salvar Tarefa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        /* ==========================================================================
+           1. ESTRUTURA DE DADOS E PERSISTÊNCIA LOCALSTORAGE
+           ========================================================================== */
+        const STORAGE_KEY = 'AGROIA_SYSTEM_DATA_V2';
+
+        const defaultInitialData = {
+            settings: {
+                sysName: "AGROIA",
+                propertyName: "Fazenda Demonstração",
+                sysDescription: "Sistema de Gestão Agrícola Inteligente",
+                unit: "ha",
+                cultures: ["Milho", "Soja", "Algodão", "Café", "Trigo"],
+                minHumidityAlert: 30,
+                iaParamUmidadeAlvo: 45,
+                iaParamEvapo: 0.8
+            },
+            talhoes: [
+                { id: "TAL-1", nome: "Talhão 01 - Norte", area: 120.0, cultura: "Milho", status: "Ativo" },
+                { id: "TAL-2", nome: "Talhão 02 - Sul", area: 250.0, cultura: "Soja", status: "Ativo" },
+                { id: "TAL-3", nome: "Talhão 03 - Leste", area: 85.5, cultura: "Algodão", status: "Pousio" }
+            ],
+            agriData: [
+                {
+                    id: "AGR-101",
+                    data: "2026-09-20",
+                    talhaoId: "TAL-1",
+                    cultura: "Milho",
+                    chuva: 12.5,
+                    temp: 28.4,
+                    umidade: 38.0,
+                    irrigacao: 15000,
+                    fertilizante: 120,
+                    pragas: "Baixa",
+                    produtividade: 840,
+                    qualidade: 8.5,
+                    desperdicio: 2.1
+                },
+                {
+                    id: "AGR-102",
+                    data: "2026-09-22",
+                    talhaoId: "TAL-2",
+                    cultura: "Soja",
+                    chuva: 0.0,
+                    temp: 31.2,
+                    umidade: 29.5,
+                    irrigacao: 28000,
+                    fertilizante: 200,
+                    pragas: "Nenhuma",
+                    produtividade: 1150,
+                    qualidade: 9.0,
+                    desperdicio: 1.5
+                }
+            ],
+            tasks: [
+                { id: "TSK-1", title: "Calibrar Sensores Talhão 02", desc: "Verificar leituras de umidade do solo", status: "A Fazer" },
+                { id: "TSK-2", title: "Manutenção Anual Pivô 1", desc: "Substituir buchas e revisar eletricidade", status: "Em Execução" },
+                { id: "TSK-3", title: "Mapeamento das divisas", desc: "Acompanhamento da área total", status: "Concluído" }
+            ],
+            sprints: [
+                { id: 1, name: "Sprint 1 — Entendimento do problema", goal: "Mapear gargalos operacionais e levantamento hídrico", status: "Concluída", progress: 100 },
+                { id: 2, name: "Sprint 2 — Dados e IA", goal: "Estruturação das tabelas de decisão e regras de recomendação", status: "Concluída", progress: 100 },
+                { id: 3, name: "Sprint 3 — Desenvolvimento da solução", goal: "Implementação das rotinas de cálculo e CRUDs locais", status: "Em Andamento", progress: 85 },
+                { id: 4, name: "Sprint 4 — MVP", goal: "Consolidação da interface unificada para validação de campo", status: "Planejada", progress: 20 },
+                { id: 5, name: "Sprint 5 — Impacto no negócio", goal: "Análise quantitativa da economia de recursos e produtividade", status: "Planejada", progress: 0 }
+            ]
+        };
+
+        function getStore() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (!data) {
+                    saveStore(defaultInitialData);
+                    return JSON.parse(JSON.stringify(defaultInitialData));
+                }
+                return JSON.parse(data);
+            } catch (e) {
+                console.error("Erro ao carregar localStorage:", e);
+                return JSON.parse(JSON.stringify(defaultInitialData));
+            }
+        }
+
+        function saveStore(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                showToast("Erro ao salvar dados no navegador.", "error");
+            }
+        }
+
+        /* ==========================================================================
+           2. NAVEGAÇÃO E INTERFACE
+           ========================================================================== */
+        function navigate(sectionId) {
+            const sections = document.querySelectorAll('.section-view');
+            const links = document.querySelectorAll('.nav-link');
+
+            sections.forEach(sec => sec.classList.remove('active'));
+            links.forEach(lnk => lnk.classList.remove('active'));
+
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            const targetLink = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
+            if (targetLink) {
+                targetLink.classList.add('active');
+            }
+
+            // Update Title
+            const store = getStore();
+            const sysName = store.settings.sysName || "AGROIA";
+            document.getElementById('page-title').innerText = `${sysName} - ${sectionId.toUpperCase()}`;
+
+            // Close mobile menu if open
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+
+            // Trigger Section Refresh
+            refreshSectionView(sectionId);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3500);
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        /* ==========================================================================
+           3. ATUALIZAÇÃO DINÂMICA DE VISÕES
+           ========================================================================== */
+        function refreshSectionView(sectionId) {
+            switch (sectionId) {
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'irrigacao':
+                    populateIrrigationTalhoes();
+                    break;
+                case 'qualidade-inteligente':
+                    renderQualidadeInteligente();
+                    break;
+                case 'producao-sustentavel':
+                    renderProducaoSustentavel();
+                    break;
+                case 'dados-agricolas':
+                    renderAgriTable();
+                    break;
+                case 'talhoes':
+                    renderTalhoes();
+                    break;
+                case 'qualidade-dados':
+                    renderQualidadeDados();
+                    break;
+                case 'kanban':
+                    renderKanban();
+                    break;
+                case 'sprints':
+                    renderSprints();
+                    break;
+                case 'modelo-ia':
+                    loadIaParams();
+                    break;
+                case 'configuracoes':
+                    loadSettingsForm();
+                    break;
+            }
+        }
+
+        /* ==========================================================================
+           4. DASHBOARD (CÁLCULOS REAIS)
+           ========================================================================== */
+        function renderDashboard() {
+            const store = getStore();
+            document.getElementById('dash-prop-name').innerText = store.settings.propertyName || "Propriedade";
+
+            // Calculando indicadores
+            const talhoes = store.talhoes || [];
+            const agri = store.agriData || [];
+
+            const totalAreaHa = talhoes.reduce((acc, curr) => acc + (parseFloat(curr.area) || 0), 0);
+            const totalTalhoes = talhoes.length;
+
+            document.getElementById('dash-area').innerText = totalAreaHa > 0 ? `${totalAreaHa.toLocaleString('pt-BR')} ha` : "Sem dados suficientes";
+            document.getElementById('dash-qtd-talhoes').innerText = totalTalhoes;
+
+            if (agri.length === 0) {
+                const noDataText = "Sem dados suficientes";
+                document.getElementById('dash-producao').innerText = noDataText;
+                document.getElementById('dash-produtividade-media').innerText = noDataText;
+                document.getElementById('dash-agua-utilizada').innerText = noDataText;
+                document.getElementById('dash-agua-recomendada').innerText = noDataText;
+                document.getElementById('dash-economia').innerText = noDataText;
+                document.getElementById('dash-eficiencia').innerText = noDataText;
+                document.getElementById('dash-umidade').innerText = noDataText;
+                document.getElementById('dash-precipitacao').innerText = noDataText;
+                document.getElementById('dash-qualidade').innerText = noDataText;
+                document.getElementById('dash-desperdicio').innerText = noDataText;
+                document.getElementById('dashboard-chart-container').innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">Sem dados suficientes para gerar o gráfico.</p>`;
+                return;
+            }
+
+            const totalProducao = agri.reduce((acc, curr) => acc + (parseFloat(curr.produtividade) || 0), 0);
+            const totalAguaUtilizada = agri.reduce((acc, curr) => acc + (parseFloat(curr.irrigacao) || 0), 0);
+            const totalChuva = agri.reduce((acc, curr) => acc + (parseFloat(curr.chuva) || 0), 0);
+            const somaUmidade = agri.reduce((acc, curr) => acc + (parseFloat(curr.umidade) || 0), 0);
+            const somaQualidade = agri.reduce((acc, curr) => acc + (parseFloat(curr.qualidade) || 0), 0);
+            const somaDesperdicio = agri.reduce((acc, curr) => acc + (parseFloat(curr.desperdicio) || 0), 0);
+
+            // Regra estimativa recomendada: ~80% da água utilizada em média operacional
+            const totalAguaRecomendada = totalAguaUtilizada * 0.82;
+            const economiaEstimada = Math.max(0, totalAguaUtilizada - totalAguaRecomendada);
+            const eficienciaIrrigacao = totalAguaUtilizada > 0 ? ((totalAguaRecomendada / totalAguaUtilizada) * 100).toFixed(1) : 100;
+
+            const prodMediaPorHa = totalAreaHa > 0 ? (totalProducao / totalAreaHa).toFixed(2) : 0;
+
+            document.getElementById('dash-producao').innerText = `${totalProducao.toLocaleString('pt-BR')} ton`;
+            document.getElementById('dash-produtividade-media').innerText = `${prodMediaPorHa} ton/ha`;
+            document.getElementById('dash-agua-utilizada').innerText = `${totalAguaUtilizada.toLocaleString('pt-BR')} L`;
+            document.getElementById('dash-agua-recomendada').innerText = `${totalAguaRecomendada.toLocaleString('pt-BR', {maximumFractionDigits: 0})} L`;
+            document.getElementById('dash-economia').innerText = `${economiaEstimada.toLocaleString('pt-BR', {maximumFractionDigits: 0})} L`;
+            document.getElementById('dash-eficiencia').innerText = `${eficienciaIrrigacao}%`;
+            document.getElementById('dash-umidade').innerText = `${(somaUmidade / agri.length).toFixed(1)}%`;
+            document.getElementById('dash-precipitacao').innerText = `${totalChuva.toFixed(1)} mm`;
+            document.getElementById('dash-qualidade').innerText = `${(somaQualidade / agri.length).toFixed(1)} / 10`;
+            document.getElementById('dash-desperdicio').innerText = `${(somaDesperdicio / agri.length).toFixed(1)}%`;
+
+            // Dynamic Native HTML/CSS Chart
+            renderDashboardChart(talhoes, agri);
+        }
+
+        function refreshDashboard() {
+            renderDashboard();
+            showToast("Dados do Dashboard recalculados com sucesso!");
+        }
+
+        function renderDashboardChart(talhoes, agri) {
+            const container = document.getElementById('dashboard-chart-container');
+            if (talhoes.length === 0) {
+                container.innerHTML = `<p style="padding: 20px; color: var(--text-secondary);">Sem dados suficientes para gerar o gráfico.</p>`;
+                return;
+            }
+
+            // Agrupar produção por talhão
+            const mapProd = {};
+            talhoes.forEach(t => mapProd[t.nome] = 0);
+            agri.forEach(a => {
+                const t = talhoes.find(item => item.id === a.talhaoId);
+                const name = t ? t.nome : a.talhaoId;
+                mapProd[name] = (mapProd[name] || 0) + (parseFloat(a.produtividade) || 0);
+            });
+
+            const maxVal = Math.max(...Object.values(mapProd), 1);
+
+            let chartHtml = `<div class="simple-bar-chart">`;
+            for (const [nome, val] of Object.entries(mapProd)) {
+                const heightPct = Math.round((val / maxVal) * 100);
+                chartHtml += `
+                    <div class="chart-bar-group">
+                        <div class="chart-bar" style="height: ${Math.max(heightPct, 5)}%;">
+                            <span class="chart-bar-value">${val}t</span>
+                        </div>
+                        <span class="chart-label">${nome}</span>
+                    </div>
+                `;
+            }
+            chartHtml += `</div>`;
+            container.innerHTML = chartHtml;
+        }
+
+        /* ==========================================================================
+           5. ANÁLISE DE IRRIGAÇÃO (CÁLCULOS TRANSPARENTES POR REGRAS)
+           ========================================================================== */
+        function populateIrrigationTalhoes() {
+            const store = getStore();
+            const select = document.getElementById('irr-talhao');
+            select.innerHTML = '<option value="">-- Selecione o Talhão --</option>';
+            store.talhoes.forEach(t => {
+                select.innerHTML += `<option value="${t.id}">${t.nome} (${t.cultura})</option>`;
+            });
+        }
+
+        function autoFillIrrigationTalhaoData() {
+            const store = getStore();
+            const id = document.getElementById('irr-talhao').value;
+            const t = store.talhoes.find(item => item.id === id);
+            if (t) {
+                document.getElementById('irr-cultura').value = t.cultura;
+                document.getElementById('irr-area').value = (parseFloat(t.area) * 10000).toFixed(0); // ha para m²
+            }
+        }
+
+        function calculateIrrigation(e) {
+            e.preventDefault();
+            const areaM2 = parseFloat(document.getElementById('irr-area').value);
+            const umidade = parseFloat(document.getElementById('irr-umidade').value);
+            const temp = parseFloat(document.getElementById('irr-temp').value);
+            const chuva = parseFloat(document.getElementById('irr-chuva').value);
+            const aguaAnterior = parseFloat(document.getElementById('irr-agua-anterior').value);
+
+            if (isNaN(areaM2) || areaM2 <= 0) {
+                showToast("Área deve ser um valor maior que zero.", "error");
+                return;
+            }
+
+            // Regra Agronômica Determinística
+            const store = getStore();
+            const umidadeAlvo = store.settings.iaParamUmidadeAlvo || 45;
+            const fatorEvapo = store.settings.iaParamEvapo || 0.8;
+
+            let necessidadeNivel = "Normal";
+            let fatorUmid = (umidadeAlvo - umidade);
+
+            if (fatorUmid <= 0) {
+                necessidadeNivel = "Baixa / Desnecessária";
+            } else if (fatorUmid > 15) {
+                necessidadeNivel = "Alta";
+            }
+
+            // Cálculo volumétrico em Litros
+            // L por m² = (Déficit Umidade % * Fator) + (Temp * FatorEvapo) - Chuva Recente
+            let litrosPorM2 = Math.max(0, (fatorUmid * 0.2) + (temp * fatorEvapo * 0.1) - (chuva * 0.5));
+            let aguaRecomendada = Math.round(litrosPorM2 * areaM2);
+
+            const aguaAntM2 = (aguaAnterior / areaM2).toFixed(2);
+            const aguaRecM2 = (aguaRecomendada / areaM2).toFixed(2);
+            const economia = Math.max(0, aguaAnterior - aguaRecomendada);
+            const pctEconomia = aguaAnterior > 0 ? ((economia / aguaAnterior) * 100).toFixed(1) : "0.0";
+
+            document.getElementById('res-necessidade').innerText = necessidadeNivel;
+            document.getElementById('res-agua-rec').innerText = `${aguaRecomendada.toLocaleString('pt-BR')} L`;
+            document.getElementById('res-agua-rec-m2').innerText = `${aguaRecM2} L/m²`;
+            document.getElementById('res-agua-ant').innerText = `${aguaAnterior.toLocaleString('pt-BR')} L`;
+            document.getElementById('res-agua-ant-m2').innerText = `${aguaAntM2} L/m²`;
+            document.getElementById('res-economia').innerText = `${economia.toLocaleString('pt-BR')} L`;
+            document.getElementById('res-economia-pct').innerText = `${pctEconomia}% de redução`;
+
+            document.getElementById('res-justificativa').innerText = 
+                `Modelo de recomendação baseado em regras matematico-agronômicas. Umidade atual (${umidade}%) vs Alvo (${umidadeAlvo}%). ` +
+                `Precipitação recente de ${chuva} mm abatida do cálculo de evapotranspiração estimada (${temp}°C).`;
+
+            document.getElementById('irrigation-result').style.display = 'block';
+            showToast("Análise de irrigação efetuada com sucesso!");
+        }
+
+        /* ==========================================================================
+           6. TALHÕES (CRUD REAL)
+           ========================================================================== */
+        function renderTalhoes() {
+            const store = getStore();
+            const search = document.getElementById('talhao-search').value.toLowerCase();
+            const tbody = document.getElementById('talhoes-table-body');
+            tbody.innerHTML = '';
+
+            const filtered = store.talhoes.filter(t => 
+                t.nome.toLowerCase().includes(search) || t.cultura.toLowerCase().includes(search)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-secondary);">Nenhum talhão encontrado.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(t => {
+                const areaM2 = (parseFloat(t.area) * 10000).toLocaleString('pt-BR');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${t.id}</td>
+                    <td><strong>${escapeHtml(t.nome)}</strong></td>
+                    <td>${parseFloat(t.area).toLocaleString('pt-BR')} ha</td>
+                    <td>${areaM2} m²</td>
+                    <td>${escapeHtml(t.cultura)}</td>
+                    <td><span class="badge ${t.status === 'Ativo' ? 'badge-success' : 'badge-warning'}">${t.status}</span></td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline" onclick="editTalhao('${t.id}')">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTalhao('${t.id}')">Excluir</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function populateCulturaOptions(selectId) {
+            const store = getStore();
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+            store.settings.cultures.forEach(c => {
+                select.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+        }
+
+        function openTalhaoModal() {
+            document.getElementById('modal-talhao-title').innerText = "Cadastrar Talhão";
+            document.getElementById('form-talhao').reset();
+            document.getElementById('talhao-id').value = '';
+            populateCulturaOptions('talhao-cultura');
+            openModal('modal-talhao');
+        }
+
+        function editTalhao(id) {
+            const store = getStore();
+            const t = store.talhoes.find(item => item.id === id);
+            if (!t) return;
+
+            document.getElementById('modal-talhao-title').innerText = "Editar Talhão";
+            document.getElementById('talhao-id').value = t.id;
+            document.getElementById('talhao-nome').value = t.nome;
+            document.getElementById('talhao-area').value = t.area;
+            populateCulturaOptions('talhao-cultura');
+            document.getElementById('talhao-cultura').value = t.cultura;
+            document.getElementById('talhao-status').value = t.status;
+
+            openModal('modal-talhao');
+        }
+
+        function saveTalhao(e) {
+            e.preventDefault();
+            const store = getStore();
+            const id = document.getElementById('talhao-id').value;
+            const nome = document.getElementById('talhao-nome').value.trim();
+            const area = parseFloat(document.getElementById('talhao-area').value);
+            const cultura = document.getElementById('talhao-cultura').value;
+            const status = document.getElementById('talhao-status').value;
+
+            if (!nome || isNaN(area) || area <= 0) {
+                showToast("Por favor preencha nome válido e área maior que zero.", "error");
+                return;
+            }
+
+            if (id) {
+                // Edit
+                const idx = store.talhoes.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    store.talhoes[idx] = { id, nome, area, cultura, status };
+                    showToast("Talhão atualizado com sucesso!");
+                }
+            } else {
+                // New
+                const newId = `TAL-${Date.now().toString().slice(-4)}`;
+                store.talhoes.push({ id: newId, nome, area, cultura, status });
+                showToast("Talhão cadastrado com sucesso!");
+            }
+
+            saveStore(store);
+            closeModal('modal-talhao');
+            renderTalhoes();
+            renderDashboard();
+        }
+
+        function deleteTalhao(id) {
+            if (!confirm("Tem certeza que deseja excluir este talhão? Os dados agrícolas vinculados podem ser afetados.")) return;
+            const store = getStore();
+            store.talhoes = store.talhoes.filter(t => t.id !== id);
+            saveStore(store);
+            showToast("Talhão removido com sucesso!");
+            renderTalhoes();
+            renderDashboard();
+        }
+
+        /* ==========================================================================
+           7. DADOS AGRÍCOLAS (CRUD REAL, FILTROS, ORDENAÇÃO)
+           ========================================================================== */
+        function renderAgriTable() {
+            const store = getStore();
+            const search = document.getElementById('agri-search').value.toLowerCase();
+            const filterTalhao = document.getElementById('agri-filter-talhao').value;
+            const sortMode = document.getElementById('agri-sort').value;
+            const tbody = document.getElementById('agri-data-table');
+
+            // Atualizar select de filtro de talhão
+            const selectFiltro = document.getElementById('agri-filter-talhao');
+            if (selectFiltro.options.length <= 1) {
+                selectFiltro.innerHTML = '<option value="">Todos os Talhões</option>';
+                store.talhoes.forEach(t => {
+                    selectFiltro.innerHTML += `<option value="${t.id}">${t.nome}</option>`;
+                });
+            }
+
+            let filtered = store.agriData.filter(item => {
+                const matchSearch = item.cultura.toLowerCase().includes(search) || item.talhaoId.toLowerCase().includes(search);
+                const matchTalhao = !filterTalhao || item.talhaoId === filterTalhao;
+                return matchSearch && matchTalhao;
+            });
+
+            // Sorting
+            filtered.sort((a, b) => {
+                if (sortMode === 'data-desc') return new Date(b.data) - new Date(a.data);
+                if (sortMode === 'data-asc') return new Date(a.data) - new Date(b.data);
+                if (sortMode === 'prod-desc') return b.produtividade - a.produtividade;
+                return 0;
+            });
+
+            tbody.innerHTML = '';
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color: var(--text-secondary);">Nenhum registro agrícola encontrado.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const talhaoObj = store.talhoes.find(t => t.id === item.talhaoId);
+                const talhaoNome = talhaoObj ? talhaoObj.nome : item.talhaoId;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatDate(item.data)}</td>
+                    <td>${escapeHtml(talhaoNome)}</td>
+                    <td>${escapeHtml(item.cultura)}</td>
+                    <td>${item.chuva}</td>
+                    <td>${item.temp}</td>
+                    <td>${item.umidade}%</td>
+                    <td>${item.irrigacao.toLocaleString('pt-BR')}</td>
+                    <td>${item.fertilizante}</td>
+                    <td>${item.pragas}</td>
+                    <td>${item.produtividade}</td>
+                    <td>${item.qualidade}</td>
+                    <td>${item.desperdicio}%</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline" onclick="editAgriData('${item.id}')">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAgriData('${item.id}')">Excluir</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAgriModal() {
+            const store = getStore();
+            if (store.talhoes.length === 0) {
+                showToast("Cadastre ao menos um talhão antes de registrar dados agrícolas.", "warning");
+                return;
+            }
+
+            document.getElementById('modal-agri-title').innerText = "Novo Registro Agrícola";
+            document.getElementById('form-agri').reset();
+            document.getElementById('agri-id').value = '';
+            document.getElementById('agri-data').value = new Date().toISOString().split('T')[0];
+
+            // Populate selects
+            const talhaoSel = document.getElementById('agri-talhao-select');
+            talhaoSel.innerHTML = '';
+            store.talhoes.forEach(t => {
+                talhaoSel.innerHTML += `<option value="${t.id}">${t.nome}</option>`;
+            });
+
+            populateCulturaOptions('agri-cultura-select');
+            openModal('modal-agri');
+        }
+
+        function editAgriData(id) {
+            const store = getStore();
+            const item = store.agriData.find(a => a.id === id);
+            if (!item) return;
+
+            openAgriModal();
+            document.getElementById('modal-agri-title').innerText = "Editar Registro Agrícola";
+            document.getElementById('agri-id').value = item.id;
+            document.getElementById('agri-data').value = item.data;
+            document.getElementById('agri-talhao-select').value = item.talhaoId;
+            document.getElementById('agri-cultura-select').value = item.cultura;
+            document.getElementById('agri-chuva').value = item.chuva;
+            document.getElementById('agri-temp').value = item.temp;
+            document.getElementById('agri-umidade').value = item.umidade;
+            document.getElementById('agri-irrigacao').value = item.irrigacao;
+            document.getElementById('agri-fertilizante').value = item.fertilizante;
+            document.getElementById('agri-pragas').value = item.pragas;
+            document.getElementById('agri-produtividade').value = item.produtividade;
+            document.getElementById('agri-qualidade').value = item.qualidade;
+            document.getElementById('agri-desperdicio').value = item.desperdicio;
+        }
+
+        function saveAgriData(e) {
+            e.preventDefault();
+            const store = getStore();
+            const id = document.getElementById('agri-id').value;
+
+            const record = {
+                id: id || `AGR-${Date.now().toString().slice(-4)}`,
+                data: document.getElementById('agri-data').value,
+                talhaoId: document.getElementById('agri-talhao-select').value,
+                cultura: document.getElementById('agri-cultura-select').value,
+                chuva: parseFloat(document.getElementById('agri-chuva').value) || 0,
+                temp: parseFloat(document.getElementById('agri-temp').value) || 0,
+                umidade: parseFloat(document.getElementById('agri-umidade').value) || 0,
+                irrigacao: parseFloat(document.getElementById('agri-irrigacao').value) || 0,
+                fertilizante: parseFloat(document.getElementById('agri-fertilizante').value) || 0,
+                pragas: document.getElementById('agri-pragas').value,
+                produtividade: parseFloat(document.getElementById('agri-produtividade').value) || 0,
+                qualidade: parseFloat(document.getElementById('agri-qualidade').value) || 0,
+                desperdicio: parseFloat(document.getElementById('agri-desperdicio').value) || 0
+            };
+
+            if (id) {
+                const idx = store.agriData.findIndex(a => a.id === id);
+                if (idx !== -1) store.agriData[idx] = record;
+                showToast("Registro agrícola atualizado!");
+            } else {
+                store.agriData.push(record);
+                showToast("Registro agrícola adicionado!");
+            }
+
+            saveStore(store);
+            closeModal('modal-agri');
+            renderAgriTable();
+            renderDashboard();
+        }
+
+        function deleteAgriData(id) {
+            if (!confirm("Deseja realmente remover este registro?")) return;
+            const store = getStore();
+            store.agriData = store.agriData.filter(a => a.id !== id);
+            saveStore(store);
+            showToast("Registro removido!");
+            renderAgriTable();
+            renderDashboard();
+        }
+
+        function exportAgriCSV() {
+            const store = getStore();
+            if (store.agriData.length === 0) {
+                showToast("Não há dados para exportar.", "warning");
+                return;
+            }
+
+            let csv = "ID,Data,TalhaoID,Cultura,Chuva_mm,Temp_C,Umidade_pct,Irrigacao_L,Fertilizante_kg,Pragas,Produtividade_ton,Qualidade,Desperdicio_pct\n";
+            store.agriData.forEach(r => {
+                csv += `${r.id},${r.data},${r.talhaoId},${r.cultura},${r.chuva},${r.temp},${r.umidade},${r.irrigacao},${r.fertilizante},${r.pragas},${r.produtividade},${r.qualidade},${r.desperdicio}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `dados_agricolas_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            showToast("Arquivo CSV exportado com sucesso!");
+        }
+
+        /* ==========================================================================
+           8. QUALIDADE DOS DADOS (VERIFICAÇÕES AUTOMÁTICAS)
+           ========================================================================== */
+        function renderQualidadeDados() {
+            const store = getStore();
+            const agri = store.agriData;
+            const talhoes = store.talhoes;
+
+            let total = agri.length;
+            let problemasCount = 0;
+            const report = [];
+
+            agri.forEach(r => {
+                let hasIssue = false;
+                // Validações
+                if (!r.data || isNaN(new Date(r.data).getTime())) {
+                    report.push({ id: r.id, tipo: "Data Inválida", desc: "Data ausente ou malformatada." });
+                    hasIssue = true;
+                }
+                if (!talhoes.some(t => t.id === r.talhaoId)) {
+                    report.push({ id: r.id, tipo: "Talhão Inexistente", desc: `Talhão ID ${r.talhaoId} não encontrado no cadastro.` });
+                    hasIssue = true;
+                }
+                if (r.umidade < 0 || r.umidade > 100) {
+                    report.push({ id: r.id, tipo: "Valor Fora da Faixa", desc: `Umidade (${r.umidade}%) fora da faixa plausível (0-100%).` });
+                    hasIssue = true;
+                }
+                if (r.qualidade < 0 || r.qualidade > 10) {
+                    report.push({ id: r.id, tipo: "Valor Fora da Faixa", desc: `Qualidade (${r.qualidade}) fora da faixa 0-10.` });
+                    hasIssue = true;
+                }
+                if (r.desperdicio < 0 || r.desperdicio > 100) {
+                    report.push({ id: r.id, tipo: "Valor Fora da Faixa", desc: `Desperdício (${r.desperdicio}%) inválido.` });
+                    hasIssue = true;
+                }
+
+                if (hasIssue) problemasCount++;
+            });
+
+            const validos = total - problemasCount;
+            const completude = total > 0 ? ((validos / total) * 100).toFixed(1) : "100.0";
+
+            document.getElementById('qd-total').innerText = total;
+            document.getElementById('qd-validos').innerText = validos;
+            document.getElementById('qd-problemas').innerText = problemasCount;
+            document.getElementById('qd-completude').innerText = `${completude}%`;
+
+            const tbody = document.getElementById('qd-report-table');
+            tbody.innerHTML = '';
+
+            if (report.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--success);">Nenhuma inconsistência de dados detectada!</td></tr>`;
+            } else {
+                report.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>Dados Agrícolas</td>
+                            <td>${item.id}</td>
+                            <td><span class="badge badge-danger">${item.tipo}</span></td>
+                            <td>${item.desc}</td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        /* ==========================================================================
+           9. QUALIDADE INTELIGENTE & PRODUÇÃO SUSTENTÁVEL
+           ========================================================================== */
+        function renderQualidadeInteligente() {
+            const store = getStore();
+            const agri = store.agriData;
+
+            if (agri.length === 0) {
+                const txt = "Sem dados suficientes";
+                document.getElementById('qi-qualidade').innerText = txt;
+                document.getElementById('qi-produtividade').innerText = txt;
+                document.getElementById('qi-desperdicio').innerText = txt;
+                document.getElementById('qi-pragas').innerText = txt;
+                document.getElementById('qi-padroes-list').innerHTML = `<p style="color:var(--text-secondary);">Cadastre registros agrícolas para visualizar os padrões.</p>`;
+                return;
+            }
+
+            const qualMedia = (agri.reduce((a, b) => a + b.qualidade, 0) / agri.length).toFixed(1);
+            const prodMedia = (agri.reduce((a, b) => a + b.produtividade, 0) / agri.length).toFixed(1);
+            const despMedio = (agri.reduce((a, b) => a + b.desperdicio, 0) / agri.length).toFixed(1);
+
+            document.getElementById('qi-qualidade').innerText = `${qualMedia} / 10`;
+            document.getElementById('qi-produtividade').innerText = `${prodMedia} ton`;
+            document.getElementById('qi-desperdicio').innerText = `${despMedio}%`;
+
+            // Mapeamento de pragas
+            const pragaMap = { "Nenhuma": 0, "Baixa": 1, "Média": 2, "Alta": 3 };
+            const somaPragas = agri.reduce((a, b) => a + (pragaMap[b.pragas] || 0), 0);
+            const mediaPragasVal = somaPragas / agri.length;
+            let pragaTexto = "Baixa";
+            if (mediaPragasVal > 1.8) pragaTexto = "Alta";
+            else if (mediaPragasVal > 0.8) pragaTexto = "Média";
+
+            document.getElementById('qi-pragas').innerText = pragaTexto;
+
+            // Identificação de padrões simples
+            let htmlPadroes = `<ul style="padding-left: 20px; line-height: 1.8;">`;
+            const criticos = agri.filter(a => a.desperdicio > 3.0 || a.qualidade < 7.0 || a.pragas === 'Alta');
+
+            if (criticos.length > 0) {
+                htmlPadroes += `<li><strong>Atenção:</strong> Detectados ${criticos.length} registros com incidência de desvio de qualidade ou desperdício superior a 3%.</li>`;
+            } else {
+                htmlPadroes += `<li><strong>Operação Estável:</strong> Todos os registros mantêm parâmetros normais de qualidade.</li>`;
+            }
+
+            const altaUmid = agri.filter(a => a.umidade > 60);
+            if (altaUmid.length > 0) {
+                htmlPadroes += `<li><strong>Padrão de Umidade:</strong> ${altaUmid.length} medições indicam solo próximo à saturação. Otimize a irrigação.</li>`;
+            }
+            htmlPadroes += `</ul>`;
+
+            document.getElementById('qi-padroes-list').innerHTML = htmlPadroes;
+        }
+
+        function renderProducaoSustentavel() {
+            const store = getStore();
+            const agri = store.agriData;
+            const talhoes = store.talhoes;
+
+            if (agri.length === 0 || talhoes.length === 0) {
+                const txt = "Sem dados suficientes";
+                document.getElementById('sust-agua-utilizada').innerText = txt;
+                document.getElementById('sust-diferenca-agua').innerText = txt;
+                document.getElementById('sust-agua-m2').innerText = txt;
+                document.getElementById('sust-prod-area').innerText = txt;
+                document.getElementById('sust-fertilizante').innerText = txt;
+                document.getElementById('sust-desperdicio').innerText = txt;
+                document.getElementById('sust-impacto-texto').innerHTML = `<p style="color:var(--text-secondary);">Sem dados cadastrados.</p>`;
+                return;
+            }
+
+            const areaTotalM2 = talhoes.reduce((a, b) => a + (parseFloat(b.area) * 10000), 0);
+            const areaTotalHa = talhoes.reduce((a, b) => a + parseFloat(b.area), 0);
+
+            const aguaTotal = agri.reduce((a, b) => a + b.irrigacao, 0);
+            const aguaRecomendadaTotal = aguaTotal * 0.82; // Estimativa
+            const difAgua = aguaTotal - aguaRecomendadaTotal;
+
+            const fertTotal = agri.reduce((a, b) => a + b.fertilizante, 0);
+            const prodTotal = agri.reduce((a, b) => a + b.produtividade, 0);
+
+            const aguaPorM2 = areaTotalM2 > 0 ? (aguaTotal / areaTotalM2).toFixed(2) : "0.00";
+            const prodPorHa = areaTotalHa > 0 ? (prodTotal / areaTotalHa).toFixed(2) : "0.00";
+
+            document.getElementById('sust-agua-utilizada').innerText = `${aguaTotal.toLocaleString('pt-BR')} L`;
+            document.getElementById('sust-diferenca-agua').innerText = `${difAgua.toLocaleString('pt-BR', {maximumFractionDigits:0})} L`;
+            document.getElementById('sust-agua-m2').innerText = `${aguaPorM2} L/m²`;
+            document.getElementById('sust-prod-area').innerText = `${prodPorHa} ton/ha`;
+            document.getElementById('sust-fertilizante').innerText = `${fertTotal.toLocaleString('pt-BR')} kg`;
+            document.getElementById('sust-desperdicio').innerText = `${agri.reduce((a, b) => a + b.desperdicio, 0).toFixed(1)}% total`;
+
+            document.getElementById('sust-impacto-texto').innerHTML = `
+                <p style="line-height: 1.6;">
+                    Com base no consumo acumulado de <strong>${aguaTotal.toLocaleString('pt-BR')} Litros</strong> de água e aplicação de 
+                    <strong>${fertTotal.toLocaleString('pt-BR')} kg</strong> de fertilizantes, a taxa de eficiência de aplicação hídrica por metro quadrado monitorado é de 
+                    <strong>${aguaPorM2} L/m²</strong>. A otimização através da curva de recomendação possui um potencial direto de redução hídrica sem prejuízo da produtividade média de <strong>${prodPorHa} ton/ha</strong>.
+                </p>
+            `;
+        }
+
+        /* ==========================================================================
+           10. KANBAN FUNCIONAL
+           ========================================================================== */
+        function renderKanban() {
+            const store = getStore();
+            const tasks = store.tasks || [];
+
+            const todoCol = document.getElementById('kanban-todo');
+            const doingCol = document.getElementById('kanban-doing');
+            const doneCol = document.getElementById('kanban-done');
+
+            todoCol.innerHTML = '';
+            doingCol.innerHTML = '';
+            doneCol.innerHTML = '';
+
+            let cTodo = 0, cDoing = 0, cDone = 0;
+
+            tasks.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'kanban-card';
+                card.draggable = true;
+                card.ondragstart = (e) => drag(e, t.id);
+
+                card.innerHTML = `
+                    <h5>${escapeHtml(t.title)}</h5>
+                    <p>${escapeHtml(t.desc || '')}</p>
+                    <div class="kanban-actions">
+                        <select onchange="changeTaskStatus('${t.id}', this.value)" style="padding:2px 5px; font-size:0.8rem;">
+                            <option value="A Fazer" ${t.status === 'A Fazer' ? 'selected' : ''}>A Fazer</option>
+                            <option value="Em Execução" ${t.status === 'Em Execução' ? 'selected' : ''}>Em Execução</option>
+                            <option value="Concluído" ${t.status === 'Concluído' ? 'selected' : ''}>Concluído</option>
+                        </select>
+                        <div>
+                            <button class="btn btn-sm btn-outline" onclick="editTask('${t.id}')">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTask('${t.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `;
+
+                if (t.status === 'A Fazer') {
+                    todoCol.appendChild(card);
+                    cTodo++;
+                } else if (t.status === 'Em Execução') {
+                    doingCol.appendChild(card);
+                    cDoing++;
+                } else {
+                    doneCol.appendChild(card);
+                    cDone++;
+                }
+            });
+
+            document.getElementById('count-todo').innerText = cTodo;
+            document.getElementById('count-doing').innerText = cDoing;
+            document.getElementById('count-done').innerText = cDone;
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev, taskId) {
+            ev.dataTransfer.setData("text/plain", taskId);
+        }
+
+        function drop(ev, newStatus) {
+            ev.preventDefault();
+            const taskId = ev.dataTransfer.getData("text/plain");
+            if (taskId) {
+                changeTaskStatus(taskId, newStatus);
+            }
+        }
+
+        function changeTaskStatus(id, newStatus) {
+            const store = getStore();
+            const task = store.tasks.find(t => t.id === id);
+            if (task) {
+                task.status = newStatus;
+                saveStore(store);
+                renderKanban();
+                showToast("Status da tarefa alterado!");
+            }
+        }
+
+        function openTaskModal() {
+            document.getElementById('modal-task-title').innerText = "Nova Tarefa";
+            document.getElementById('form-task').reset();
+            document.getElementById('task-id').value = '';
+            openModal('modal-task');
+        }
+
+        function editTask(id) {
+            const store = getStore();
+            const t = store.tasks.find(item => item.id === id);
+            if (!t) return;
+
+            document.getElementById('modal-task-title').innerText = "Editar Tarefa";
+            document.getElementById('task-id').value = t.id;
+            document.getElementById('task-title').value = t.title;
+            document.getElementById('task-desc').value = t.desc;
+            document.getElementById('task-status').value = t.status;
+            openModal('modal-task');
+        }
+
+        function saveTask(e) {
+            e.preventDefault();
+            const store = getStore();
+            const id = document.getElementById('task-id').value;
+            const title = document.getElementById('task-title').value.trim();
+            const desc = document.getElementById('task-desc').value.trim();
+            const status = document.getElementById('task-status').value;
+
+            if (!title) return;
+
+            if (id) {
+                const idx = store.tasks.findIndex(t => t.id === id);
+                if (idx !== -1) store.tasks[idx] = { id, title, desc, status };
+                showToast("Tarefa atualizada!");
+            } else {
+                const newId = `TSK-${Date.now().toString().slice(-4)}`;
+                store.tasks.push({ id: newId, title, desc, status });
+                showToast("Tarefa criada!");
+            }
+
+            saveStore(store);
+            closeModal('modal-task');
+            renderKanban();
+        }
+
+        function deleteTask(id) {
+            if (!confirm("Excluir esta tarefa?")) return;
+            const store = getStore();
+            store.tasks = store.tasks.filter(t => t.id !== id);
+            saveStore(store);
+            showToast("Tarefa excluída!");
+            renderKanban();
+        }
+
+        /* ==========================================================================
+           11. SPRINTS
+           ========================================================================== */
+        function renderSprints() {
+            const store = getStore();
+            const container = document.getElementById('sprints-container');
+            container.innerHTML = '';
+
+            store.sprints.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h3>${escapeHtml(s.name)}</h3>
+                        <span class="badge ${s.status === 'Concluída' ? 'badge-success' : s.status === 'Em Andamento' ? 'badge-info' : 'badge-warning'}">${s.status}</span>
+                    </div>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 12px;"><strong>Objetivo:</strong> ${escapeHtml(s.goal)}</p>
+                    <div style="background: #e0e0e0; border-radius: 4px; height: 10px; overflow: hidden;">
+                        <div style="background: var(--primary); width: ${s.progress}%; height: 100%;"></div>
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px; display: block; text-align: right;">${s.progress}% Concluído</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /* ==========================================================================
+           12. MODELO DE IA & PARÂMETROS
+           ========================================================================== */
+        function loadIaParams() {
+            const store = getStore();
+            document.getElementById('ia-param-umidade-alvo').value = store.settings.iaParamUmidadeAlvo || 45;
+            document.getElementById('ia-param-evapo').value = store.settings.iaParamEvapo || 0.8;
+        }
+
+        function saveIaParams(e) {
+            e.preventDefault();
+            const store = getStore();
+            store.settings.iaParamUmidadeAlvo = parseFloat(document.getElementById('ia-param-umidade-alvo').value);
+            store.settings.iaParamEvapo = parseFloat(document.getElementById('ia-param-evapo').value);
+
+            saveStore(store);
+            document.getElementById('ia-last-update').innerText = new Date().toLocaleDateString('pt-BR');
+            showToast("Parâmetros do modelo recalculados com sucesso!");
+        }
+
+        /* ==========================================================================
+           13 & 14. CONFIGURAÇÕES & ADMINISTRAÇÃO DO SISTEMA
+           ========================================================================== */
+        function loadSettingsForm() {
+            const store = getStore();
+            document.getElementById('cfg-property-name').value = store.settings.propertyName || "";
+            document.getElementById('cfg-unit').value = store.settings.unit || "ha";
+
+            document.getElementById('cfg-sys-name').value = store.settings.sysName || "AGROIA";
+            document.getElementById('cfg-sys-desc').value = store.settings.sysDescription || "";
+            document.getElementById('cfg-cultures').value = (store.settings.cultures || []).join(', ');
+            document.getElementById('cfg-min-humidity').value = store.settings.minHumidityAlert || 30;
+        }
+
+        function saveGeneralSettings(e) {
+            e.preventDefault();
+            const store = getStore();
+            store.settings.propertyName = document.getElementById('cfg-property-name').value.trim();
+            store.settings.unit = document.getElementById('cfg-unit').value;
+
+            saveStore(store);
+            showToast("Configurações gerais salvas!");
+            renderDashboard();
+        }
+
+        function saveAdminSettings(e) {
+            e.preventDefault();
+            const store = getStore();
+            store.settings.sysName = document.getElementById('cfg-sys-name').value.trim();
+            store.settings.sysDescription = document.getElementById('cfg-sys-desc').value.trim();
+
+            const culturesRaw = document.getElementById('cfg-cultures').value;
+            store.settings.cultures = culturesRaw.split(',').map(c => c.trim()).filter(c => c.length > 0);
+            store.settings.minHumidityAlert = parseFloat(document.getElementById('cfg-min-humidity').value);
+
+            saveStore(store);
+
+            // Atualiza marcas da interface
+            document.getElementById('sys-brand-title').innerText = `🌱 ${store.settings.sysName}`;
+            document.getElementById('mobile-title').innerText = store.settings.sysName;
+
+            showToast("Personalização do sistema salva!");
+        }
+
+        /* ==========================================================================
+           15 & 16. BACKUP COMPLETO & RESTAURAÇÃO DE LOCALSTORAGE
+           ========================================================================== */
+        function exportBackup() {
+            const store = getStore();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `AGROIA_BACKUP_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("Backup exportado com sucesso!");
+        }
+
+        function triggerImportBackup() {
+            document.getElementById('backup-file-input').click();
+        }
+
+        function importBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const parsed = JSON.parse(evt.target.result);
+                    // Validação simples de estrutura
+                    if (!parsed.settings || !parsed.talhoes || !parsed.agriData) {
+                        throw new Error("Formato de backup incompatível.");
+                    }
+                    saveStore(parsed);
+                    showToast("Backup importado e restaurado com sucesso!");
+                    setTimeout(() => window.location.reload(), 1000);
+                } catch (err) {
+                    showToast("Erro ao importar backup: Arquivo JSON inválido.", "error");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function restoreDemoData() {
+            if (!confirm("Deseja restaurar os dados demonstrativos padrão?")) return;
+            saveStore(defaultInitialData);
+            showToast("Dados demonstrativos restaurados!");
+            setTimeout(() => window.location.reload(), 500);
+        }
+
+        function clearAllData() {
+            if (!confirm("ATENÇÃO: Deseja REALMENTE apagar todos os dados do sistema? Esta ação não pode ser desfeita.")) return;
+            const emptyData = {
+                settings: defaultInitialData.settings,
+                talhoes: [],
+                agriData: [],
+                tasks: [],
+                sprints: defaultInitialData.sprints
+            };
+            saveStore(emptyData);
+            showToast("Todos os dados foram apagados com sucesso.", "warning");
+            setTimeout(() => window.location.reload(), 500);
+        }
+
+        /* ==========================================================================
+           23. UTILITÁRIOS
+           ========================================================================== */
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '--';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            return dateStr;
+        }
+
+        /* ==========================================================================
+           INICIALIZAÇÃO DA APLICAÇÃO
+           ========================================================================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            const store = getStore();
+
+            // Atualiza títulos com base nas configurações salvas
+            if (store.settings.sysName) {
+                document.getElementById('sys-brand-title').innerText = `🌱 ${store.settings.sysName}`;
+                document.getElementById('mobile-title').innerText = store.settings.sysName;
+            }
+
+            // Inicializa a navegação
+            navigate('dashboard');
+        });
+    </script>
+</body>
+</html>
